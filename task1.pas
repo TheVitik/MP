@@ -1,13 +1,14 @@
 program Task1;
 uses crt;
-label ReadLine, SplitWord, CheckArray, OuterSort, InnerSort, Print;
+label ReadLine, SplitWord, StopWord,SkipAdding, CheckArray, OuterWordSort, InnerWordSort, OuterCounterSort, InnerCounterSort, Print;
 var
     f : Text;
     word_,tempWord : String;
     letter : char;
-    i,j,len,pos,tempCount,MAX,fucking,slaves : Integer;
+    i,j,len,pos,tempCount,MAX,stoplen : Integer;
     words : Array[0..9999] of String;
     counters : Array[0..9999] of Integer;
+    stopWords : Array[0..11] of String = ('the','of','a','not','for','an','I','am','m','to','on','in');
     found : boolean;
 begin
     clrscr;
@@ -15,8 +16,9 @@ begin
     reset(f);
 
     {SET MAX COUNT OF OUTPUT WORDS}
-    MAX:=5;
+    MAX:=8;
 
+    stoplen:=12;
     len:=0;
     found:=False;
     ReadLine:
@@ -31,15 +33,31 @@ begin
             {if letter in range a-Z, except 91-96 ascii code characters}
             if ((letter>='A') and (letter<='Z')) or ((letter>='a') and (letter<='z')) then
                 begin
+                {Uppercase to lowercase}
+                if ((letter>='A') and (letter<='Z')) then
+                    begin
+                        letter:=Chr(ord(letter)+32);
+                    end;  
                 {then add letter to the current word}
                 word_:=word_+letter;
                 end
             else
                 begin
-                {else reset word}
+                i:=0;
+                {Check for stop word}
+                StopWord:
+                if i<stoplen then
+                    begin
+                    if stopWords[i]=word_ then
+                        begin
+                        goto SkipAdding;
+                        end;
+                    i:=i+1; 
+                    goto StopWord;   
+                    end;
+                {Iterate array with words}
                 i:=0;
                 pos:=0;
-                {Iterate array with words}
                 CheckArray:
                 if i<len then
                     begin
@@ -67,6 +85,7 @@ begin
                         len:=len+1;
                         end;
                     end;   
+                SkipAdding:
                 found:=False;        
                 word_:='';
                 end;
@@ -78,15 +97,42 @@ begin
             end;
     end;
     close(f);
+    {Bubble sort}
+    {Sorting by words}
+    i:=0;
+    j:=0;
+    OuterWordSort:
+    if i<len then
+        begin
+        j:=0;
+        InnerWordSort:
+        if j<len-i-1 then
+            begin
+            if words[j]>words[j+1] then
+                begin
+                {Swap numbers}
+                tempCount:=counters[j];
+                tempWord:=words[j];
+                counters[j]:=counters[j+1];
+                words[j]:=words[j+1];
+                counters[j+1]:=tempCount;
+                words[j+1]:=tempWord;
+                end;
+            j:=j+1;    
+            goto InnerWordSort;
+            end;
+        i:=i+1;    
+        goto OuterWordSort;
+        end;
     {Bubble sort, descending}
     {Sorting by counter}
     i:=0;
     j:=0;
-    OuterSort:
+    OuterCounterSort:
     if i<len then
         begin
         j:=0;
-        InnerSort:
+        InnerCounterSort:
         if j<len-i-1 then
             begin
             
@@ -101,10 +147,10 @@ begin
                 words[j+1]:=tempWord;
                 end;
             j:=j+1;    
-            goto InnerSort;
+            goto InnerCounterSort;
             end;
         i:=i+1;    
-        goto OuterSort;
+        goto OuterCounterSort;
         end;
     {Print the words and count}
     i:=0;
